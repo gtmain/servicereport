@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Desk — Daily &amp; Running Reports</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1c1b19;
+    --panel:#242220;
+    --panel-2:#2c2a27;
+    --line:#3a3733;
+    --ink:#efe9e0;
+    --ink-dim:#a9a29a;
+    --amber:#e8642c;
+    --amber-dim:#7a3a1d;
+    --steel:#5c7d8a;
+    --good:#7fae6c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top left, rgba(232,100,44,0.06), transparent 45%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:32px 16px 80px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+
+  /* HEADER */
+  header{margin-bottom:28px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.18em;
+    color:var(--amber);
+    text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+    margin-bottom:6px;
+  }
+  .eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);}
+  h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    font-size:clamp(28px,5vw,38px);
+    letter-spacing:.01em;
+    margin:0 0 6px;
+    text-transform:uppercase;
+  }
+  .sub{color:var(--ink-dim);font-size:14px;max-width:52ch;line-height:1.5;}
+
+  /* TAB SWITCH — styled like a gauge selector */
+  .switch{
+    display:flex;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:4px;
+    margin:26px 0;
+    gap:4px;
+  }
+  .switch button{
+    flex:1;
+    background:transparent;
+    border:none;
+    color:var(--ink-dim);
+    font-family:'Oswald',sans-serif;
+    font-size:14px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    padding:12px 10px;
+    border-radius:7px;
+    cursor:pointer;
+    transition:background .18s, color .18s;
+  }
+  .switch button.active{
+    background:linear-gradient(180deg,#ea6d34,#d1531f);
+    color:#1c1409;
+    font-weight:600;
+  }
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  /* CARD */
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:22px;
+    margin-bottom:18px;
+  }
+  .card h2{
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    font-size:15px;
+    letter-spacing:.06em;
+    color:var(--ink-dim);
+    margin:0 0 16px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .card h2 .num{
+    font-family:'IBM Plex Mono',monospace;
+    background:var(--amber-dim);
+    color:#ffc9a8;
+    font-size:11px;
+    padding:2px 7px;
+    border-radius:5px;
+  }
+
+  .date-row{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+  .date-row .field{flex:1;min-width:140px;}
+
+  label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-dim);
+    margin-bottom:5px;
+    letter-spacing:.02em;
+  }
+  input[type=text],input[type=number],input[type=date]{
+    width:100%;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--ink);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:15px;
+    padding:10px 11px;
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(232,100,44,.15);}
+  input[type=date]{color-scheme:dark;}
+
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:14px;
+    margin-bottom:14px;
+    padding-bottom:14px;
+    border-bottom:1px dashed var(--line);
+  }
+  .field-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+  .field-title{
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .duo{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;}
+  .sum-box{
+    text-align:center;
+    min-width:78px;
+  }
+  .sum-box .val{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:17px;
+    color:var(--good);
+  }
+  .sum-box .lbl{font-size:10px;color:var(--ink-dim);letter-spacing:.08em;text-transform:uppercase;}
+
+  /* SEND BUTTON */
+  .send-btn{
+    width:100%;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    background:linear-gradient(180deg,#2fbe64,#25a052);
+    color:#0d2413;
+    font-family:'Oswald',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    font-weight:600;
+    font-size:15px;
+    border:none;
+    border-radius:10px;
+    padding:15px;
+    cursor:pointer;
+    margin-top:6px;
+    transition:filter .15s, transform .1s;
+  }
+  .send-btn:hover{filter:brightness(1.08);}
+  .send-btn:active{transform:scale(.99);}
+  .send-btn svg{width:19px;height:19px;fill:#0d2413;}
+
+  .preview{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    color:var(--ink-dim);
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px;
+    white-space:pre-wrap;
+    line-height:1.55;
+    margin-top:14px;
+    max-height:220px;
+    overflow-y:auto;
+  }
+  .reset-link{
+    display:inline-block;
+    margin-top:10px;
+    font-size:12px;
+    color:var(--ink-dim);
+    text-decoration:underline;
+    cursor:pointer;
+  }
+  .reset-link:hover{color:var(--amber);}
+
+  @media(max-width:480px){
+    .duo{grid-template-columns:1fr 1fr;}
+    .sum-box{grid-column:1/-1;text-align:left;display:flex;gap:8px;align-items:baseline;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Service Desk Log</div>
+    <h1>Daily &amp; Running Reports</h1>
+    <p class="sub">Two independent counters: log today's numbers on their own, or track a running total across a date range. Each sends straight to WhatsApp.</p>
+  </header>
+
+  <div class="switch">
+    <button class="active" data-panel="daily">Today's Report</button>
+    <button data-panel="running">Running Total</button>
+  </div>
+
+  <!-- ===================== PANEL 1: DAILY ===================== -->
+  <div class="panel active" id="panel-daily">
+    <div class="card">
+      <h2><span class="num">01</span> Date</h2>
+      <div class="date-row">
+        <div class="field">
+          <label>Report Date</label>
+          <input type="date" id="d-date">
+        </div>
+      </div>
+
+      <h2><span class="num">02</span> Today's Figures</h2>
+      <div id="daily-fields"></div>
+    </div>
+
+    <div class="card">
+      <button class="send-btn" onclick="sendDaily()">
+        <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.6.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.5-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.6 1.4 5.1L2 22l5-1.3c1.4.8 3.1 1.3 4.9 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3C4.4 15 4 13.5 4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8z"/></svg>
+        Send to WhatsApp
+      </button>
+      <div class="preview" id="daily-preview"></div>
+    </div>
+  </div>
+
+  <!-- ===================== PANEL 2: RUNNING TOTAL ===================== -->
+  <div class="panel" id="panel-running">
+    <div class="card">
+      <h2><span class="num">01</span> Date Range</h2>
+      <div class="date-row">
+        <div class="field">
+          <label>From</label>
+          <input type="date" id="r-from">
+        </div>
+        <div class="field">
+          <label>To</label>
+          <input type="date" id="r-to">
+        </div>
+      </div>
+
+      <h2><span class="num">02</span> Previous Total + Today, per item</h2>
+      <div id="running-fields"></div>
+    </div>
+
+    <div class="card">
+      <button class="send-btn" onclick="sendRunning()">
+        <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.6.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.5-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.6 1.4 5.1L2 22l5-1.3c1.4.8 3.1 1.3 4.9 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3C4.4 15 4 13.5 4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8z"/></svg>
+        Send to WhatsApp
+      </button>
+      <div class="preview" id="running-preview"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const FIELDS = [
+  {key:"total_service", label:"Total Service"},
+  {key:"free_service", label:"Free Service"},
+  {key:"paid_service", label:"Paid Service"},
+  {key:"quick_service", label:"Quick Service"},
+  {key:"parts_workshop", label:"Parts Sold through Workshop"},
+  {key:"parts_counter", label:"Parts Sold through Counter"},
+  {key:"engine_oil", label:"Engine Oil"},
+  {key:"labour_charges", label:"Labour Charges"},
+  {key:"fi_update", label:"Fi Update"},
+  {key:"chain_lube", label:"Chain Lube"},
+];
+
+function fmtDate(iso){
+  if(!iso) return "____";
+  const [y,m,d]=iso.split("-");
+  return `${d}-${m}-${y}`;
+}
+
+/* ---------- build DAILY fields ---------- */
+const dailyContainer = document.getElementById("daily-fields");
+FIELDS.forEach(f=>{
+  const row = document.createElement("div");
+  row.className = "field-row";
+  row.innerHTML = `
+    <div class="field-title">${f.label}</div>
+    <input type="number" inputmode="decimal" placeholder="0" id="daily-${f.key}">
+  `;
+  dailyContainer.appendChild(row);
+});
+
+/* ---------- build RUNNING fields ---------- */
+const runningContainer = document.getElementById("running-fields");
+FIELDS.forEach(f=>{
+  const row = document.createElement("div");
+  row.className = "field-row";
+  row.innerHTML = `
+    <div class="field-title">${f.label}</div>
+    <div class="duo">
+      <div>
+        <label>Previous Total</label>
+        <input type="number" inputmode="decimal" placeholder="0" id="prev-${f.key}" oninput="updateSum('${f.key}')">
+      </div>
+      <div>
+        <label>Today</label>
+        <input type="number" inputmode="decimal" placeholder="0" id="today-${f.key}" oninput="updateSum('${f.key}')">
+      </div>
+      <div class="sum-box">
+        <div class="lbl">Sum</div>
+        <div class="val" id="sum-${f.key}">0</div>
+      </div>
+    </div>
+  `;
+  runningContainer.appendChild(row);
+});
+
+function updateSum(key){
+  const prev = parseFloat(document.getElementById(`prev-${key}`).value) || 0;
+  const today = parseFloat(document.getElementById(`today-${key}`).value) || 0;
+  document.getElementById(`sum-${key}`).textContent = (prev+today);
+}
+
+/* ---------- tab switching ---------- */
+document.querySelectorAll(".switch button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".switch button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+    document.getElementById(`panel-${btn.dataset.panel}`).classList.add("active");
+  });
+});
+
+/* ---------- default dates ---------- */
+const today = new Date().toISOString().split("T")[0];
+document.getElementById("d-date").value = today;
+document.getElementById("r-to").value = today;
+
+/* ---------- DAILY message + send ---------- */
+function buildDailyMessage(){
+  const date = fmtDate(document.getElementById("d-date").value);
+  let lines = [`*Service Report — ${date}*`, ""];
+  FIELDS.forEach(f=>{
+    const v = document.getElementById(`daily-${f.key}`).value || "0";
+    lines.push(`${f.label}: ${v}`);
+  });
+  return lines.join("\n");
+}
+function sendDaily(){
+  const msg = buildDailyMessage();
+  document.getElementById("daily-preview").textContent = msg;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+}
+
+/* ---------- RUNNING message + send ---------- */
+function buildRunningMessage(){
+  const from = fmtDate(document.getElementById("r-from").value);
+  const to = fmtDate(document.getElementById("r-to").value);
+  let lines = [`*Running Service Report*`, `Date: ${from} to ${to}`, ""];
+  FIELDS.forEach(f=>{
+    const prev = parseFloat(document.getElementById(`prev-${f.key}`).value) || 0;
+    const t = parseFloat(document.getElementById(`today-${f.key}`).value) || 0;
+    lines.push(`${f.label}: ${prev + t}`);
+  });
+  return lines.join("\n");
+}
+function sendRunning(){
+  const msg = buildRunningMessage();
+  document.getElementById("running-preview").textContent = msg;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+}
+</script>
+</body>
+</html>
