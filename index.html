@@ -3,400 +3,492 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Service Desk — Daily &amp; Running Reports</title>
+<title>Gangarampur Service — Daily Register</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#1c1b19;
-    --panel:#242220;
-    --panel-2:#2c2a27;
-    --line:#3a3733;
-    --ink:#efe9e0;
-    --ink-dim:#a9a29a;
-    --amber:#e8642c;
-    --amber-dim:#7a3a1d;
-    --steel:#5c7d8a;
-    --good:#7fae6c;
+    --bg:#17191b;
+    --panel:#212427;
+    --panel-2:#282b2f;
+    --line:#35393e;
+    --amber:#e8a33d;
+    --amber-dim:#7a5b2a;
+    --green:#4fb286;
+    --text:#eceeef;
+    --muted:#9aa0a6;
+    --mono: 'JetBrains Mono', monospace;
+    --disp: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
   body{
-    background:
-      radial-gradient(ellipse at top left, rgba(232,100,44,0.06), transparent 45%),
-      var(--bg);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    min-height:100vh;
-    padding:32px 16px 80px;
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--body);
+    padding:24px 16px 80px;
   }
-  .wrap{max-width:760px;margin:0 auto;}
+  .wrap{max-width:640px; margin:0 auto;}
 
-  /* HEADER */
-  header{margin-bottom:28px;}
-  .eyebrow{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    letter-spacing:.18em;
-    color:var(--amber);
-    text-transform:uppercase;
-    display:flex;align-items:center;gap:8px;
-    margin-bottom:6px;
-  }
-  .eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);}
-  h1{
-    font-family:'Oswald',sans-serif;
-    font-weight:700;
-    font-size:clamp(28px,5vw,38px);
-    letter-spacing:.01em;
-    margin:0 0 6px;
-    text-transform:uppercase;
-  }
-  .sub{color:var(--ink-dim);font-size:14px;max-width:52ch;line-height:1.5;}
-
-  /* TAB SWITCH — styled like a gauge selector */
-  .switch{
-    display:flex;
-    background:var(--panel-2);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:4px;
-    margin:26px 0;
-    gap:4px;
-  }
-  .switch button{
-    flex:1;
-    background:transparent;
-    border:none;
-    color:var(--ink-dim);
-    font-family:'Oswald',sans-serif;
-    font-size:14px;
-    letter-spacing:.04em;
-    text-transform:uppercase;
-    padding:12px 10px;
-    border-radius:7px;
-    cursor:pointer;
-    transition:background .18s, color .18s;
-  }
-  .switch button.active{
-    background:linear-gradient(180deg,#ea6d34,#d1531f);
-    color:#1c1409;
-    font-weight:600;
-  }
-
-  .panel{display:none;}
-  .panel.active{display:block;}
-
-  /* CARD */
-  .card{
+  .ticket{
     background:var(--panel);
     border:1px solid var(--line);
     border-radius:14px;
-    padding:22px;
+    padding:22px 20px;
     margin-bottom:18px;
+    position:relative;
+    overflow:hidden;
   }
-  .card h2{
-    font-family:'Oswald',sans-serif;
-    text-transform:uppercase;
-    font-size:15px;
-    letter-spacing:.06em;
-    color:var(--ink-dim);
-    margin:0 0 16px;
-    display:flex;align-items:center;gap:10px;
+  .ticket::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:4px;
+    background:repeating-linear-gradient(90deg, var(--amber) 0 10px, transparent 10px 18px);
+    opacity:.55;
   }
-  .card h2 .num{
-    font-family:'IBM Plex Mono',monospace;
-    background:var(--amber-dim);
-    color:#ffc9a8;
-    font-size:11px;
-    padding:2px 7px;
-    border-radius:5px;
+  h1{
+    font-family:var(--disp); font-size:22px; letter-spacing:.02em;
+    margin:6px 0 2px; color:var(--text);
+  }
+  .sub{color:var(--muted); font-size:13px; font-family:var(--mono);}
+  .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.12em;
+    color:var(--amber); text-transform:uppercase;
   }
 
-  .date-row{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
-  .date-row .field{flex:1;min-width:140px;}
+  h2{
+    font-family:var(--disp); font-size:15px; letter-spacing:.02em;
+    margin:0 0 14px; color:var(--text);
+    display:flex; align-items:center; gap:8px;
+  }
+  h2 .n{
+    font-family:var(--mono); font-size:11px; color:var(--bg);
+    background:var(--amber); border-radius:5px; padding:2px 6px;
+  }
 
   label{
-    display:block;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    color:var(--ink-dim);
-    margin-bottom:5px;
-    letter-spacing:.02em;
+    display:block; font-size:12.5px; color:var(--muted); margin-bottom:4px;
   }
-  input[type=text],input[type=number],input[type=date]{
-    width:100%;
-    background:var(--panel-2);
-    border:1px solid var(--line);
-    border-radius:8px;
-    color:var(--ink);
-    font-family:'IBM Plex Mono',monospace;
-    font-size:15px;
-    padding:10px 11px;
-    outline:none;
-    transition:border-color .15s, box-shadow .15s;
+  input[type=date], input[type=number], input[type=text]{
+    width:100%; background:var(--panel-2); border:1px solid var(--line);
+    color:var(--text); border-radius:8px; padding:9px 10px;
+    font-family:var(--mono); font-size:14px; margin-bottom:12px;
   }
-  input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(232,100,44,.15);}
-  input[type=date]{color-scheme:dark;}
+  input:focus{outline:2px solid var(--amber); outline-offset:1px;}
 
-  .field-row{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:14px;
-    margin-bottom:14px;
-    padding-bottom:14px;
-    border-bottom:1px dashed var(--line);
-  }
-  .field-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
-  .field-title{
-    font-size:14px;
-    font-weight:600;
-    color:var(--ink);
-  }
-  .duo{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;}
-  .sum-box{
-    text-align:center;
-    min-width:78px;
-  }
-  .sum-box .val{
-    font-family:'IBM Plex Mono',monospace;
-    font-weight:600;
-    font-size:17px;
-    color:var(--good);
-  }
-  .sum-box .lbl{font-size:10px;color:var(--ink-dim);letter-spacing:.08em;text-transform:uppercase;}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:0 12px;}
 
-  /* SEND BUTTON */
-  .send-btn{
-    width:100%;
-    display:flex;align-items:center;justify-content:center;gap:10px;
-    background:linear-gradient(180deg,#2fbe64,#25a052);
-    color:#0d2413;
-    font-family:'Oswald',sans-serif;
-    text-transform:uppercase;
-    letter-spacing:.05em;
-    font-weight:600;
-    font-size:15px;
-    border:none;
-    border-radius:10px;
-    padding:15px;
-    cursor:pointer;
-    margin-top:6px;
-    transition:filter .15s, transform .1s;
+  button{
+    font-family:var(--body); font-weight:600; font-size:14px;
+    border:none; border-radius:9px; padding:11px 16px;
+    cursor:pointer; transition:filter .15s ease;
   }
-  .send-btn:hover{filter:brightness(1.08);}
-  .send-btn:active{transform:scale(.99);}
-  .send-btn svg{width:19px;height:19px;fill:#0d2413;}
+  button:hover{filter:brightness(1.08);}
+  button:active{filter:brightness(.95);}
+  .btn-primary{background:var(--amber); color:#20180a; width:100%;}
+  .btn-ghost{
+    background:transparent; color:var(--text); border:1px solid var(--line);
+  }
+  .btn-wa{background:#3fae63; color:#eafff1;}
+  .btn-copy{background:var(--panel-2); color:var(--text); border:1px solid var(--line);}
+  .row-btns{display:flex; gap:10px; margin-top:6px; flex-wrap:wrap;}
+  .row-btns button{flex:1; min-width:120px;}
 
-  .preview{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12.5px;
-    color:var(--ink-dim);
-    background:var(--panel-2);
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:12px;
-    white-space:pre-wrap;
-    line-height:1.55;
-    margin-top:14px;
-    max-height:220px;
-    overflow-y:auto;
+  .status{
+    font-family:var(--mono); font-size:12.5px; color:var(--green);
+    min-height:18px; margin-top:8px;
   }
-  .reset-link{
-    display:inline-block;
-    margin-top:10px;
-    font-size:12px;
-    color:var(--ink-dim);
-    text-decoration:underline;
+
+  .history{
+    max-height:180px; overflow-y:auto; margin-top:10px;
+    border-top:1px solid var(--line); padding-top:10px;
+  }
+  .hist-row{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--mono); font-size:12.5px; padding:6px 0;
+    border-bottom:1px dashed var(--line); color:var(--muted);
+  }
+  .hist-row button{
+    background:none; border:none; color:#d96b6b; font-size:12px; padding:2px 6px;
     cursor:pointer;
   }
-  .reset-link:hover{color:var(--amber);}
 
-  @media(max-width:480px){
-    .duo{grid-template-columns:1fr 1fr;}
-    .sum-box{grid-column:1/-1;text-align:left;display:flex;gap:8px;align-items:baseline;}
+  pre.preview{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:8px;
+    padding:12px; font-family:var(--mono); font-size:12.5px; white-space:pre-wrap;
+    color:var(--text); margin:12px 0;
   }
+
+  .mapnote{
+    font-size:12px; color:var(--muted); background:var(--panel-2);
+    border:1px solid var(--line); border-radius:8px; padding:10px 12px;
+    margin-bottom:14px; line-height:1.5;
+  }
+  .mapnote b{color:var(--amber-dim);}
+
+  .rangebar{display:flex; gap:10px;}
+  .rangebar > div{flex:1;}
+
+  .loading{color:var(--muted); font-family:var(--mono); font-size:12.5px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <header>
-    <div class="eyebrow">Service Desk Log</div>
-    <h1>Daily &amp; Running Reports</h1>
-    <p class="sub">Two independent counters: log today's numbers on their own, or track a running total across a date range. Each sends straight to WhatsApp.</p>
-  </header>
-
-  <div class="switch">
-    <button class="active" data-panel="daily">Today's Report</button>
-    <button data-panel="running">Running Total</button>
+  <div class="ticket">
+    <div class="eyebrow">Workshop Job Register</div>
+    <h1>Gangarampur Service</h1>
+    <div class="sub" id="todayLabel">loading…</div>
   </div>
 
-  <!-- ===================== PANEL 1: DAILY ===================== -->
-  <div class="panel active" id="panel-daily">
-    <div class="card">
-      <h2><span class="num">01</span> Date</h2>
-      <div class="date-row">
-        <div class="field">
-          <label>Report Date</label>
-          <input type="date" id="d-date">
-        </div>
-      </div>
+  <!-- DAILY ENTRY -->
+  <div class="ticket">
+    <h2><span class="n">1</span> Today's Entry</h2>
+    <label for="entryDate">Date</label>
+    <input type="date" id="entryDate">
 
-      <h2><span class="num">02</span> Today's Figures</h2>
-      <div id="daily-fields"></div>
+    <div class="grid" id="fieldsGrid"></div>
+
+    <div class="row-btns">
+      <button class="btn-primary" id="saveBtn">Save today's entry</button>
     </div>
+    <div class="status" id="saveStatus"></div>
+  </div>
 
-    <div class="card">
-      <button class="send-btn" onclick="sendDaily()">
-        <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.6.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.5-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.6 1.4 5.1L2 22l5-1.3c1.4.8 3.1 1.3 4.9 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3C4.4 15 4 13.5 4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8z"/></svg>
-        Send to WhatsApp
-      </button>
-      <div class="preview" id="daily-preview"></div>
+  <!-- DAILY REPORT OUTPUT -->
+  <div class="ticket">
+    <h2><span class="n">2</span> Today's Report → WhatsApp</h2>
+    <pre class="preview" id="dailyPreview">Save an entry above to generate today's message.</pre>
+    <div class="row-btns">
+      <button class="btn-wa" id="dailyWaBtn">Send to WhatsApp</button>
+      <button class="btn-copy" id="dailyCopyBtn">Copy text</button>
     </div>
   </div>
 
-  <!-- ===================== PANEL 2: RUNNING TOTAL ===================== -->
-  <div class="panel" id="panel-running">
-    <div class="card">
-      <h2><span class="num">01</span> Date Range</h2>
-      <div class="date-row">
-        <div class="field">
-          <label>From</label>
-          <input type="date" id="r-from">
-        </div>
-        <div class="field">
-          <label>To</label>
-          <input type="date" id="r-to">
-        </div>
-      </div>
+  <!-- RANGE / CUMULATIVE -->
+  <div class="ticket">
+    <h2><span class="n">3</span> Range Summary</h2>
+    <div class="rangebar">
+      <div><label for="fromDate">From</label><input type="date" id="fromDate"></div>
+      <div><label for="toDate">To</label><input type="date" id="toDate"></div>
+    </div>
+    <div class="row-btns">
+      <button class="btn-ghost" id="computeRangeBtn" style="width:100%">Compute totals from saved entries</button>
+    </div>
+    <div class="status" id="rangeStatus"></div>
 
-      <h2><span class="num">02</span> Previous Total + Today, per item</h2>
-      <div id="running-fields"></div>
+    <div class="mapnote">
+      Mapping used to collapse 19 daily fields into 13 summary lines — <b>A.M.C</b> = AMC service + AMC · <b>Accidental service</b> = Accidental in + Accidental out · <b>Workshop Parts</b> = Parts sale through WS + Accidental Parts · <b>Labour charge</b> = Labour charge + Accidental Labour. Edit any total below if this isn't how you tally it.
     </div>
 
-    <div class="card">
-      <button class="send-btn" onclick="sendRunning()">
-        <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.6.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.5-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.6 1.4 5.1L2 22l5-1.3c1.4.8 3.1 1.3 4.9 1.3 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3C4.4 15 4 13.5 4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8z"/></svg>
-        Send to WhatsApp
-      </button>
-      <div class="preview" id="running-preview"></div>
+    <div class="grid" id="rangeFieldsGrid"></div>
+
+    <pre class="preview" id="rangePreview">Compute totals to generate the range message.</pre>
+    <div class="row-btns">
+      <button class="btn-wa" id="rangeWaBtn">Send to WhatsApp</button>
+      <button class="btn-copy" id="rangeCopyBtn">Copy text</button>
     </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="ticket">
+    <h2><span class="n">4</span> Saved Entries</h2>
+    <div class="history" id="historyList"><div class="loading">Loading…</div></div>
+  </div>
+
+  <div style="text-align:center; color:var(--muted); font-family:var(--mono); font-size:11px; margin-top:10px;">
+    Data is stored privately in this artifact's storage — only you can see it.
   </div>
 
 </div>
 
 <script>
 const FIELDS = [
-  {key:"total_service", label:"Total Service"},
-  {key:"free_service", label:"Free Service"},
-  {key:"paid_service", label:"Paid Service"},
-  {key:"quick_service", label:"Quick Service"},
-  {key:"parts_workshop", label:"Parts Sold through Workshop"},
-  {key:"parts_counter", label:"Parts Sold through Counter"},
-  {key:"engine_oil", label:"Engine Oil"},
-  {key:"labour_charges", label:"Labour Charges"},
-  {key:"fi_update", label:"Fi Update"},
-  {key:"chain_lube", label:"Chain Lube"},
+  {key:'serviceReport', label:"Today's service Report"},
+  {key:'delivered', label:'Delivered'},
+  {key:'freeService', label:'Free service'},
+  {key:'paidService', label:'Paid service'},
+  {key:'amcService', label:'AMC service'},
+  {key:'amc', label:'AMC'},
+  {key:'quickRepair', label:'Quick Repair'},
+  {key:'accidentalIn', label:'Accidental in'},
+  {key:'accidentalOut', label:'Accidental out'},
+  {key:'partsWS', label:'Parts sale through WS (Rs)'},
+  {key:'accidentalParts', label:'Accidental Parts'},
+  {key:'partsCounter', label:'Parts sale through counter'},
+  {key:'labourCharge', label:'Labour charge'},
+  {key:'engineOil', label:'Engine oil sold (workshop)'},
+  {key:'accidentalLabour', label:'Accidental Labour'},
+  {key:'fiCollection', label:'Fi collection'},
+  {key:'injectorCollection', label:'Injector collection'},
+  {key:'polish', label:'Polish'},
+  {key:'chainLube', label:'Chain lube'},
 ];
 
-function fmtDate(iso){
-  if(!iso) return "____";
-  const [y,m,d]=iso.split("-");
-  return `${d}-${m}-${y}`;
+const RANGE_LINES = [
+  {label:'Service Report', keys:['serviceReport']},
+  {label:'Free Service', keys:['freeService']},
+  {label:'Paid Service', keys:['paidService']},
+  {label:'Quick Repair', keys:['quickRepair']},
+  {label:'A.M.C', keys:['amcService','amc']},
+  {label:'Accidental service', keys:['accidentalIn','accidentalOut']},
+  {label:'Workshop Parts', keys:['partsWS','accidentalParts']},
+  {label:'W/S counter sell', keys:['partsCounter']},
+  {label:'Labour charge', keys:['labourCharge','accidentalLabour']},
+  {label:'Fi collection', keys:['fiCollection']},
+  {label:'Injector Collection', keys:['injectorCollection']},
+  {label:'Polish', keys:['polish']},
+  {label:'Chainlube', keys:['chainLube']},
+];
+
+function fmtDMY(dateStr){
+  // dateStr = YYYY-MM-DD -> DD/MM/YY
+  const [y,m,d] = dateStr.split('-');
+  return `${d}/${m}/${y.slice(2)}`;
+}
+function todayISO(){
+  const d = new Date();
+  const off = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - off*60000);
+  return local.toISOString().slice(0,10);
 }
 
-/* ---------- build DAILY fields ---------- */
-const dailyContainer = document.getElementById("daily-fields");
+// ---------- render entry fields ----------
+const fieldsGrid = document.getElementById('fieldsGrid');
 FIELDS.forEach(f=>{
-  const row = document.createElement("div");
-  row.className = "field-row";
-  row.innerHTML = `
-    <div class="field-title">${f.label}</div>
-    <input type="number" inputmode="decimal" placeholder="0" id="daily-${f.key}">
-  `;
-  dailyContainer.appendChild(row);
+  const div = document.createElement('div');
+  div.innerHTML = `<label for="f_${f.key}">${f.label}</label>
+    <input type="number" inputmode="decimal" id="f_${f.key}" value="0" min="0">`;
+  fieldsGrid.appendChild(div);
 });
 
-/* ---------- build RUNNING fields ---------- */
-const runningContainer = document.getElementById("running-fields");
-FIELDS.forEach(f=>{
-  const row = document.createElement("div");
-  row.className = "field-row";
-  row.innerHTML = `
-    <div class="field-title">${f.label}</div>
-    <div class="duo">
-      <div>
-        <label>Previous Total</label>
-        <input type="number" inputmode="decimal" placeholder="0" id="prev-${f.key}" oninput="updateSum('${f.key}')">
-      </div>
-      <div>
-        <label>Today</label>
-        <input type="number" inputmode="decimal" placeholder="0" id="today-${f.key}" oninput="updateSum('${f.key}')">
-      </div>
-      <div class="sum-box">
-        <div class="lbl">Sum</div>
-        <div class="val" id="sum-${f.key}">0</div>
-      </div>
-    </div>
-  `;
-  runningContainer.appendChild(row);
-});
+const entryDateInput = document.getElementById('entryDate');
+const fromDateInput = document.getElementById('fromDate');
+const toDateInput = document.getElementById('toDate');
+entryDateInput.value = todayISO();
+toDateInput.value = todayISO();
+fromDateInput.value = todayISO();
+document.getElementById('todayLabel').textContent = fmtDMY(todayISO());
 
-function updateSum(key){
-  const prev = parseFloat(document.getElementById(`prev-${key}`).value) || 0;
-  const today = parseFloat(document.getElementById(`today-${key}`).value) || 0;
-  document.getElementById(`sum-${key}`).textContent = (prev+today);
-}
-
-/* ---------- tab switching ---------- */
-document.querySelectorAll(".switch button").forEach(btn=>{
-  btn.addEventListener("click", ()=>{
-    document.querySelectorAll(".switch button").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
-    document.getElementById(`panel-${btn.dataset.panel}`).classList.add("active");
-  });
-});
-
-/* ---------- default dates ---------- */
-const today = new Date().toISOString().split("T")[0];
-document.getElementById("d-date").value = today;
-document.getElementById("r-to").value = today;
-
-/* ---------- DAILY message + send ---------- */
-function buildDailyMessage(){
-  const date = fmtDate(document.getElementById("d-date").value);
-  let lines = [`*Service Report — ${date}*`, ""];
+function getEntryValues(){
+  const obj = {};
   FIELDS.forEach(f=>{
-    const v = document.getElementById(`daily-${f.key}`).value || "0";
-    lines.push(`${f.label}: ${v}`);
+    obj[f.key] = Number(document.getElementById('f_'+f.key).value) || 0;
   });
-  return lines.join("\n");
+  return obj;
 }
-function sendDaily(){
-  const msg = buildDailyMessage();
-  document.getElementById("daily-preview").textContent = msg;
-  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+function loadEntryValues(obj){
+  FIELDS.forEach(f=>{
+    document.getElementById('f_'+f.key).value = obj[f.key] ?? 0;
+  });
 }
 
-/* ---------- RUNNING message + send ---------- */
-function buildRunningMessage(){
-  const from = fmtDate(document.getElementById("r-from").value);
-  const to = fmtDate(document.getElementById("r-to").value);
-  let lines = [`*Running Service Report*`, `Date: ${from} to ${to}`, ""];
-  FIELDS.forEach(f=>{
-    const prev = parseFloat(document.getElementById(`prev-${f.key}`).value) || 0;
-    const t = parseFloat(document.getElementById(`today-${f.key}`).value) || 0;
-    lines.push(`${f.label}: ${prev + t}`);
+// ---------- storage helpers ----------
+async function saveEntry(dateISO, values){
+  return await window.storage.set('entry:'+dateISO, JSON.stringify(values), false);
+}
+async function getEntry(dateISO){
+  try{
+    const r = await window.storage.get('entry:'+dateISO, false);
+    return r ? JSON.parse(r.value) : null;
+  }catch(e){ return null; }
+}
+async function deleteEntry(dateISO){
+  try{ await window.storage.delete('entry:'+dateISO, false); }catch(e){}
+}
+async function listEntryDates(){
+  try{
+    const r = await window.storage.list('entry:', false);
+    if(!r || !r.keys) return [];
+    return r.keys.map(k=>k.replace('entry:','')).sort();
+  }catch(e){ return []; }
+}
+
+// ---------- daily report text ----------
+function buildDailyText(dateISO, v){
+  return [
+    '"Gangarampur Service"',
+    `Date = ${fmtDMY(dateISO)}`,
+    `Today's service Report = ${v.serviceReport}`,
+    `Delivered = ${v.delivered}`,
+    `Free service = ${v.freeService}`,
+    `Paid service = ${v.paidService}`,
+    `AMC service = ${v.amcService}`,
+    `AMC = ${v.amc}`,
+    `Quick Repair = ${v.quickRepair}`,
+    `Accidental in = ${v.accidentalIn}`,
+    `Accidental out = ${v.accidentalOut}`,
+    `Parts sale through WS Rs = ${v.partsWS}`,
+    `Accidental Parts = ${v.accidentalParts}`,
+    `Parts sale through counter = ${v.partsCounter}`,
+    `Labour charge = ${v.labourCharge}`,
+    `Engine oil sold through workshop = ${v.engineOil}`,
+    `Accidental Labour = ${v.accidentalLabour}`,
+    `Fi collection = ${v.fiCollection}`,
+    `Injector collection = ${v.injectorCollection}`,
+    `Polish = ${v.polish}`,
+    `Chain lube = ${v.chainLube}`,
+  ].join('\n');
+}
+
+function buildRangeText(fromISO, toISO, totals){
+  const lines = [
+    '"GANGARAMPUR SERVICE"',
+    `${fmtDMY(fromISO)} To ${fmtDMY(toISO)}`,
+    '',
+  ];
+  RANGE_LINES.forEach(rl=>{
+    lines.push(`${rl.label} - ${totals[rl.label]}`);
   });
-  return lines.join("\n");
+  return lines.join('\n');
 }
-function sendRunning(){
-  const msg = buildRunningMessage();
-  document.getElementById("running-preview").textContent = msg;
-  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+
+function waLink(text){
+  return 'https://wa.me/?text=' + encodeURIComponent(text);
 }
+
+// ---------- save today's entry ----------
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  const dateISO = entryDateInput.value || todayISO();
+  const values = getEntryValues();
+  const statusEl = document.getElementById('saveStatus');
+  statusEl.textContent = 'Saving…';
+  const res = await saveEntry(dateISO, values);
+  if(res){
+    statusEl.textContent = `Saved entry for ${fmtDMY(dateISO)}.`;
+    document.getElementById('dailyPreview').textContent = buildDailyText(dateISO, values);
+    await renderHistory();
+  } else {
+    statusEl.textContent = 'Could not save — try again.';
+  }
+});
+
+document.getElementById('dailyWaBtn').addEventListener('click', ()=>{
+  const text = document.getElementById('dailyPreview').textContent;
+  if(!text || text.startsWith('Save an entry')) return;
+  window.open(waLink(text), '_blank');
+});
+document.getElementById('dailyCopyBtn').addEventListener('click', async ()=>{
+  const text = document.getElementById('dailyPreview').textContent;
+  try{ await navigator.clipboard.writeText(text); 
+    const b = document.getElementById('dailyCopyBtn'); const orig=b.textContent;
+    b.textContent='Copied ✓'; setTimeout(()=>b.textContent=orig,1200);
+  }catch(e){}
+});
+
+// ---------- range compute ----------
+let lastTotals = null;
+
+document.getElementById('computeRangeBtn').addEventListener('click', async ()=>{
+  const fromISO = fromDateInput.value;
+  const toISO = toDateInput.value;
+  const statusEl = document.getElementById('rangeStatus');
+  if(!fromISO || !toISO || fromISO > toISO){
+    statusEl.textContent = 'Check your from/to dates.';
+    return;
+  }
+  statusEl.textContent = 'Computing…';
+  const dates = await listEntryDates();
+  const inRange = dates.filter(d => d >= fromISO && d <= toISO);
+  if(inRange.length === 0){
+    statusEl.textContent = 'No saved entries in that range yet.';
+  }
+  const sums = {};
+  FIELDS.forEach(f=> sums[f.key] = 0);
+  for(const d of inRange){
+    const v = await getEntry(d);
+    if(!v) continue;
+    FIELDS.forEach(f=> sums[f.key] += Number(v[f.key])||0 );
+  }
+  const totals = {};
+  RANGE_LINES.forEach(rl=>{
+    totals[rl.label] = rl.keys.reduce((a,k)=>a+(sums[k]||0),0);
+  });
+  lastTotals = totals;
+  renderRangeFields(totals);
+  document.getElementById('rangePreview').textContent = buildRangeText(fromISO, toISO, totals);
+  statusEl.textContent = `Summed ${inRange.length} saved day(s) from ${fmtDMY(fromISO)} to ${fmtDMY(toISO)}.`;
+});
+
+function renderRangeFields(totals){
+  const grid = document.getElementById('rangeFieldsGrid');
+  grid.innerHTML = '';
+  RANGE_LINES.forEach(rl=>{
+    const div = document.createElement('div');
+    const id = 'r_'+rl.label.replace(/[^a-zA-Z]/g,'');
+    div.innerHTML = `<label for="${id}">${rl.label}</label>
+      <input type="number" id="${id}" value="${totals[rl.label]}">`;
+    grid.appendChild(div);
+    div.querySelector('input').addEventListener('input', (e)=>{
+      lastTotals[rl.label] = Number(e.target.value)||0;
+      const fromISO = fromDateInput.value, toISO = toDateInput.value;
+      document.getElementById('rangePreview').textContent = buildRangeText(fromISO, toISO, lastTotals);
+    });
+  });
+}
+
+document.getElementById('rangeWaBtn').addEventListener('click', ()=>{
+  const text = document.getElementById('rangePreview').textContent;
+  if(!text || text.startsWith('Compute totals')) return;
+  window.open(waLink(text), '_blank');
+});
+document.getElementById('rangeCopyBtn').addEventListener('click', async ()=>{
+  const text = document.getElementById('rangePreview').textContent;
+  try{ await navigator.clipboard.writeText(text);
+    const b = document.getElementById('rangeCopyBtn'); const orig=b.textContent;
+    b.textContent='Copied ✓'; setTimeout(()=>b.textContent=orig,1200);
+  }catch(e){}
+});
+
+// ---------- history ----------
+async function renderHistory(){
+  const el = document.getElementById('historyList');
+  const dates = await listEntryDates();
+  if(dates.length === 0){
+    el.innerHTML = '<div class="loading">No entries saved yet.</div>';
+    return;
+  }
+  el.innerHTML = '';
+  dates.slice().reverse().forEach(d=>{
+    const row = document.createElement('div');
+    row.className = 'hist-row';
+    row.innerHTML = `<span>${fmtDMY(d)}</span><span><button data-date="${d}" class="loadBtn">load</button><button data-date="${d}" class="delBtn">delete</button></span>`;
+    el.appendChild(row);
+  });
+  el.querySelectorAll('.loadBtn').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const d = b.getAttribute('data-date');
+      const v = await getEntry(d);
+      if(v){
+        entryDateInput.value = d;
+        loadEntryValues(v);
+        document.getElementById('dailyPreview').textContent = buildDailyText(d, v);
+        document.getElementById('saveStatus').textContent = `Loaded entry for ${fmtDMY(d)}.`;
+      }
+    });
+  });
+  el.querySelectorAll('.delBtn').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const d = b.getAttribute('data-date');
+      if(confirm(`Delete saved entry for ${fmtDMY(d)}?`)){
+        await deleteEntry(d);
+        await renderHistory();
+      }
+    });
+  });
+}
+
+// ---------- init ----------
+(async function init(){
+  const dates = await listEntryDates();
+  if(dates.length){
+    fromDateInput.value = dates[0];
+    const todayEntry = await getEntry(todayISO());
+    if(todayEntry){
+      loadEntryValues(todayEntry);
+      document.getElementById('dailyPreview').textContent = buildDailyText(todayISO(), todayEntry);
+    }
+  }
+  await renderHistory();
+})();
 </script>
 </body>
 </html>
